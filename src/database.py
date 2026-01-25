@@ -3,17 +3,15 @@ from __future__ import annotations
 from typing import Generator, Optional
 from pathlib import Path
 
-from platformdirs import user_data_dir
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-
-APP_NAME = "cliphist"
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 
 
 def default_db_path() -> Path:
-    base = Path(user_data_dir(APP_NAME, APP_NAME))
+    base = Path().resolve()
+    print(base)
     base.mkdir(parents=True, exist_ok=True)
-    return base / "cliphist.sqlite3"
+    return base / "database.sqlite3"
 
 
 def make_sqlite_url(db_path: Optional[Path] = None) -> str:
@@ -35,11 +33,19 @@ def make_session_local(engine):
     )
 
 
+class Base(DeclarativeBase):
+    pass
+
+
 engine = make_engine()
 SessionLocal = make_session_local(engine)
 
 
-def db() -> Generator[Session, None, None]:
+def init_database():
+    Base.metadata.create_all(bind=engine)
+
+
+def get_db() -> Generator[Session, None, None]:
     session = SessionLocal()
     try:
         yield session
