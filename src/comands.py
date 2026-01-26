@@ -105,6 +105,26 @@ def prune():
         typer.secho("\nSomting goes wrong, try again")
 
 
+@app.command()
+def search(
+    value: str = typer.Argument("", help="Tap what you wona to find in your history"),
+):
+    init_database()
+
+    db: Session = next(get_db())
+
+    result_clips = (
+        db.execute(select(Clips).where(Clips.content.like(f"%{value}%")))
+        .scalars()
+        .all()
+    )
+
+    if not result_clips:
+        typer.secho("\nCan not find by sentense")
+
+    for clip in result_clips:
+        typer.secho(f"\n{clip.id} {clip.content} {clip.content_hash}")
+
+
 # TODO: add methods for serach copied value in history
-# TODO: add method for prune all data from clips history
 # TODO: add interval method witch prune history by self
