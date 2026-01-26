@@ -1,3 +1,1 @@
-uv run python -m main clip list
-
-uv run python -m main clip --help
+uv run python -m src.cli clip --help

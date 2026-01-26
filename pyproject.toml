@@ -11,4 +11,4 @@ dependencies = [
   "typer>=0.21.1",
 ]
 [project.scripts]
-clip = "main:app"
+clip = "src.cli:app"
