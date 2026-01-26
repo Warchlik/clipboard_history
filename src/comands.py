@@ -1,10 +1,10 @@
 import hashlib
-from shutil import copy
 import time
 from typing import Optional
 import pyperclip
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import delete
 import typer
 
 from src.database import get_db, init_database
@@ -76,13 +76,33 @@ def list(number: int = typer.Argument(20, help="Ile wpisów pokazać")):
 
     db: Session = next(get_db())
 
-    clips = db.execute(select(Clips).order_by(Clips.id.desc()).limit(number)).all()
+    clips = (
+        db.execute(select(Clips).order_by(Clips.id.desc()).limit(number))
+        .scalars()
+        .all()
+    )
 
     if not clips:
         typer.secho("No clips you have in past")
 
     for clip in clips:
         typer.secho(message=f"{clip.id} {clip.content}")
+
+
+@app.command()
+def prune():
+    init_database()
+
+    db: Session = next(get_db())
+
+    try:
+        result = db.execute(delete(Clips))
+
+        db.commit()
+        typer.secho(f"\nYour clips history has been deleted: {result}")
+
+    except Exception:
+        typer.secho("\nSomting goes wrong, try again")
 
 
 # TODO: add methods for serach copied value in history
