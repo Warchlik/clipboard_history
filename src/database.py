@@ -9,7 +9,6 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 
 def default_db_path() -> Path:
     base = Path().resolve()
-    print(base)
     base.mkdir(parents=True, exist_ok=True)
     return base / "database.sqlite3"
 

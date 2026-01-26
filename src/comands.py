@@ -113,6 +113,9 @@ def search(
 
     db: Session = next(get_db())
 
+    if len(value) == 0:
+        return
+
     result_clips = (
         db.execute(select(Clips).where(Clips.content.like(f"%{value}%")))
         .scalars()
@@ -126,5 +129,4 @@ def search(
         typer.secho(f"\n{clip.id} {clip.content} {clip.content_hash}")
 
 
-# TODO: add methods for serach copied value in history
 # TODO: add interval method witch prune history by self
