@@ -11,4 +11,4 @@ dependencies = [
   "typer>=0.21.1",
 ]
 [project.scripts]
-clip = "src.cli:app"
+clip = "clipboard.cli:app"

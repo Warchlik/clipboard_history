@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import delete
 import typer
 
-from src.database import get_db, init_database
-from src.models import Clips
+from clipboard.database import get_db, init_database
+from clipboard.models import Clips
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -30,9 +30,9 @@ def sha256(value: str) -> str:
 
 
 def delete_similar_record(db: Session, content_hash: str) -> None:
-    similar_clip: Optional[Clips] = db.execute(
+    similar_clip: Optional[Clips] = db.scalars(
         select(Clips).where(Clips.content_hash == content_hash)
-    ).scalar_one_or_none()
+    ).one_or_none()
 
     if similar_clip:
         db.delete(similar_clip)
@@ -71,16 +71,12 @@ def watch(
 
 # TODO: fix listing value errors
 @app.command()
-def list(number: int = typer.Argument(20, help="Ile wpisów pokazać")):
+def list(number: int = typer.Argument(20, help="How many clips you will got to show")):
     init_database()
 
     db: Session = next(get_db())
 
-    clips = (
-        db.execute(select(Clips).order_by(Clips.id.desc()).limit(number))
-        .scalars()
-        .all()
-    )
+    clips = db.scalars(select(Clips).order_by(Clips.id.desc()).limit(number)).all()
 
     if not clips:
         typer.secho("No clips you have in past")
@@ -116,11 +112,9 @@ def search(
     if len(value) == 0:
         return
 
-    result_clips = (
-        db.execute(select(Clips).where(Clips.content.like(f"%{value}%")))
-        .scalars()
-        .all()
-    )
+    result_clips = db.scalars(
+        select(Clips).where(Clips.content.like(f"%{value}%"))
+    ).all()
 
     if not result_clips:
         typer.secho("\nCan not find by sentense")
